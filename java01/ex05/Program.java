@@ -1,9 +1,9 @@
 public class Program {
 	public static void main(String[] args) {
 		String profile = "--profile=production";
-		if (args.length == 2)
-			profile = args[1];
-		else if (args.length == 1 || args.length > 2) {
+		if (args.length == 1)
+			profile = args[0];
+		else if (args.length > 2) {
 			System.out.println("java Program [--profile=dev] or [--profile=production] or without");
 			return;
 		}
