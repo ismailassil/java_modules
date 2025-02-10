@@ -1,4 +1,4 @@
-public class App {
+public class Program {
     public static void main(String[] args) {
 		int i = 479598;
 		int b = 0;
