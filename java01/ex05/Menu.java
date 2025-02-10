@@ -206,10 +206,13 @@ public class Menu {
 		System.out.println(ANSI_YELLOW + "Check results:" + ANSI_RESET);
 		Transaction[] transactions = transactionsService.checkTransactions();
 		for (Transaction transaction : transactions) {
-			System.out.println(transaction.getSender().getName() + "(id = " + transaction.getSender().getId() + ") "
-					+ "has an unacknowledged transfer id = " + transaction.getId() + " from "
-					+ transaction.getRecipient().getName() + "(id = " + transaction.getRecipient().getId() + " for "
-					+ transaction.getTransferAmount());
+			double amount = transaction.getTransferAmount();
+			amount = amount < 0 ? amount * -1 : amount;
+			System.out
+					.println(transaction.getRecipient().getName() + "(id = " + transaction.getRecipient().getId() + ") "
+							+ "has an unacknowledged transfer id = " + transaction.getId() + " from "
+							+ transaction.getSender().getName() + "(id = " + transaction.getSender().getId() + ") for "
+							+ amount);
 		}
 	}
 
