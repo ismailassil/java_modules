@@ -1,20 +1,12 @@
-
-import java.util.UUID;
-
 public class Transaction {
-	private String id;
-	private User recipient;
-	private User sender;
-	private int transferCategory;
-	private double transferAmount;
+	private final String id;
+	private final User recipient;
+	private final User sender;
+	private final int transferCategory;
+	private final double transferAmount;
 
-	public Transaction(User recipient, User sender, int transferCategory, double transferAmount) {
-		if (transferAmount < 0 || sender.getBalance() < transferAmount) {
-			System.out.println("Balance too low");
-			return;
-		}
-
-		this.id = UUID.randomUUID().toString();
+	public Transaction(String id, User recipient, User sender, int transferCategory, double transferAmount) {
+		this.id = id;
 		this.recipient = recipient;
 		this.sender = sender;
 		this.transferCategory = transferCategory;

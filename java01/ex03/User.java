@@ -1,4 +1,3 @@
-
 public class User {
 	private int id;
 	private String name;
@@ -7,8 +6,7 @@ public class User {
 
 	public User(String name, double balance) {
 		if (balance < 0) {
-			System.out.println("Balance too low");
-			return;
+			throw new RuntimeException("Balance too low");
 		}
 		this.id = UserIdsGenerator.getInstance().generateId();
 		this.name = name;
@@ -31,9 +29,7 @@ public class User {
 				balance += amount;
 				return 0;
 			} else
-				System.out.println("Balance would be negative");
-		} else {
-			System.out.println("Amount should be negative");
+				return 2;
 		}
 		return 1;
 	}

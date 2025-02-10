@@ -6,23 +6,11 @@ public class Transaction {
 	private final double transferAmount;
 
 	public Transaction(String id, User recipient, User sender, int transferCategory, double transferAmount) {
-		// if (transferAmount < 0 || sender.getBalance() < transferAmount) {
-		// System.out.println("Balance too low");
-		// return;
-		// }
-
 		this.id = id;
 		this.recipient = recipient;
 		this.sender = sender;
 		this.transferCategory = transferCategory;
 		this.transferAmount = transferAmount;
-
-		// String msgS = sender.getName() + " -> " + recipient.getName() + ", " + -transferAmount
-		// 		+ ", OUTCOME, transaction ID " + this.id;
-		// String msgR = recipient.getName() + " -> " + sender.getName() + ", " + transferAmount
-		// 		+ ", INCOME, transaction ID " + this.id;
-		// System.out.println(msgS);
-		// System.out.println(msgR);
 	}
 
 	public String getId() {

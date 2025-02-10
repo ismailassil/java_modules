@@ -4,20 +4,28 @@ public class Menu {
 	public static final int DEBIT = 0;
 	public static final int CREDIT = 1;
 	private final String regex = "\\s+";
-	private TransactionsService transactionsService;
+	private final TransactionsService transactionsService = new TransactionsService();
 	private Scanner scanner;
 	private int numberCmd;
 
-	public Menu() {
-	}
+	public static final String ANSI_RESET = "\u001B[0m";
+	public static final String ANSI_RED = "\u001B[1;31m";
+	public static final String ANSI_YELLOW = "\u001B[33m";
 
 	public void run() {
+
+		if (transactionsService == null) {
+			System.out.println(ANSI_RED + "Error: TransactionsService is not initialized." + ANSI_RESET);
+			return;
+		}
+
 		scanner = new Scanner(System.in);
-		int cmd;
+		String line;
 		while (true) {
-			displayHeader();
 			try {
-				cmd = scanner.nextInt();
+				displayHeader();
+				line = scanner.nextLine().trim();
+				int cmd = Integer.parseInt(line);
 				switch (cmd) {
 					case 1 -> addUser();
 					case 2 -> viewUserBalance();
@@ -26,42 +34,45 @@ public class Menu {
 					case 5 -> removeTransferById();
 					case 6 -> checkTransferValidity();
 					case 7 -> {
-						break;
+						scanner.close();
+						return;
 					}
+					default -> System.out.println(ANSI_RED + "! Invalid option, please try again" + ANSI_RESET);
 				}
-			} catch (Exception e) {
-				System.out.println("! Please enter a value");
+			} catch (NumberFormatException e) {
+				System.out.println(ANSI_RED + "! Please enter a valid number" + ANSI_RESET);
+			} catch (RuntimeException e) {
+				System.out.println(ANSI_RED + "Unexpected error: " + e.getMessage() + ANSI_RESET);
 			}
 		}
 	}
 
 	private void addUser() {
 		numberCmd++;
-		System.out.println("Enter a user name and a balance");
+		System.out.println(ANSI_YELLOW + "Enter a user name and a balance" + ANSI_RESET);
 		String inputs[] = getLine();
 		if (inputs.length != 2) {
-			System.out.println("! Please enter 2 inputs");
+			System.out.println(ANSI_RED + "! Please enter 2 inputs" + ANSI_RESET);
 			return;
 		}
 		User newUser;
 		try {
 			newUser = new User(inputs[0], Double.parseDouble(inputs[1]));
+			transactionsService.addUser(newUser);
+			System.out.println("User with id = " + newUser.getId() + " is added");
 		} catch (NumberFormatException e) {
-			System.out.println(e.getMessage());
-			return;
+			System.out.println(ANSI_RED + "Invalid balance format. Please enter a number." + ANSI_RESET);
 		} catch (RuntimeException e) {
-			System.out.println(e.getMessage());
-			return;
+			System.out.println(ANSI_RED + "Error: " + e.getMessage() + ANSI_RESET);
 		}
-		transactionsService.addUser(newUser);
 	}
 
 	private void viewUserBalance() {
 		numberCmd++;
-		System.out.println("Enter a user ID");
+		System.out.println(ANSI_YELLOW + "Enter a user ID" + ANSI_RESET);
 		String inputs[] = getLine();
 		if (inputs.length != 1) {
-			System.out.println("! Please enter 1 input");
+			System.out.println(ANSI_RED + "! Please enter 1 input" + ANSI_RESET);
 			return;
 		}
 		try {
@@ -69,18 +80,18 @@ public class Menu {
 			double balance = transactionsService.getUserBalance(Integer.parseInt(inputs[0]));
 			System.out.println(transactionsService.getUserName(userId) + " - " + balance);
 		} catch (NumberFormatException e) {
-			System.out.println(e.getMessage());
+			System.out.println(ANSI_RED + "Invalid user ID. Please enter a number." + ANSI_RESET);
 		} catch (RuntimeException e) {
-			System.out.println(e.getMessage());
+			System.out.println(ANSI_RED + "Error: " + e.getMessage() + ANSI_RESET);
 		}
 	}
 
 	private void performTransfer() {
 		numberCmd++;
-		System.out.println("Enter a sender ID, a recipient ID, and a transfer amount");
+		System.out.println(ANSI_YELLOW + "Enter a sender ID, a recipient ID, and a transfer amount" + ANSI_RESET);
 		String inputs[] = getLine();
 		if (inputs.length != 3) {
-			System.out.println("! Please enter 3 inputs");
+			System.out.println(ANSI_RED + "! Please enter 3 inputs" + ANSI_RESET);
 			return;
 		}
 		try {
@@ -90,17 +101,19 @@ public class Menu {
 
 			transactionsService.doTransaction(senderId, recipientId, amount);
 			System.out.println("The transfer is completed");
-		} catch (NumberFormatException | IllegalTransactionException | UserNotFoundException e) {
-			System.out.println(e.getMessage());
+		} catch (NumberFormatException e) {
+			System.out.println(ANSI_RED + "Invalid input format. Please enter numbers correctly." + ANSI_RESET);
+		} catch (IllegalTransactionException | UserNotFoundException e) {
+			System.out.println(ANSI_RED + "Transaction error: " + e.getMessage() + ANSI_RESET);
 		}
 	}
 
 	private void viewAllTransactions() {
 		numberCmd++;
-		System.out.println("Enter a user ID");
+		System.out.println(ANSI_YELLOW + "Enter a user ID" + ANSI_RESET);
 		String inputs[] = getLine();
 		if (inputs.length != 1) {
-			System.out.println("! Please enter 1 input");
+			System.out.println(ANSI_RED + "! Please enter 1 input" + ANSI_RESET);
 			return;
 		}
 		try {
@@ -114,24 +127,25 @@ public class Menu {
 				System.out.println(reply);
 			}
 		} catch (NumberFormatException | UserNotFoundException e) {
-			System.out.println(e.getMessage());
+			System.out.println(ANSI_RED + "Error: " + e.getMessage() + ANSI_RESET);
 		}
 	}
 
 	private void removeTransferById() {
 		numberCmd++;
-		System.out.println("Enter a user ID and a transfer ID");
+		System.out.println(ANSI_YELLOW + "Enter a user ID and a transfer ID" + ANSI_RESET);
 		String inputs[] = getLine();
 		if (inputs.length != 2) {
-			System.out.println("! Please enter 2 inputs");
+			System.out.println(ANSI_RED + "! Please enter 2 inputs" + ANSI_RESET);
 			return;
 		}
 		try {
+			int userId = Integer.parseInt(inputs[0]);
+			String transactionId = inputs[1];
+
 			String recipientName = "";
 			int recipientId = 0;
 			double amount = 0.0;
-			int userId = Integer.parseInt(inputs[0]);
-			String transactionId = inputs[1];
 
 			Transaction[] transactions = transactionsService.getUserTransactions(userId);
 			for (Transaction trans : transactions) {
@@ -145,14 +159,16 @@ public class Menu {
 			}
 			transactionsService.removeTransactionById(transactionId, userId);
 			System.out.println("Transfer To " + recipientName + "(id = " + recipientId + ") " + amount + " removed");
+		} catch (NumberFormatException e) {
+			System.out.println(ANSI_RED + "Invalid input. Please enter correct numbers." + ANSI_RESET);
 		} catch (UserNotFoundException | TransactionNotFoundException e) {
-			System.out.println(e.getMessage());
+			System.out.println(ANSI_RED + "Error: " + e.getMessage() + ANSI_RESET);
 		}
 	}
 
 	private void checkTransferValidity() {
 		numberCmd++;
-		System.out.println("Check results:");
+		System.out.println(ANSI_YELLOW + "Check results:" + ANSI_RESET);
 		Transaction[] transactions = transactionsService.checkTransactions();
 		for (Transaction transaction : transactions) {
 			System.out.println(transaction.getSender().getName() + "(id = " + transaction.getSender().getId() + ") "
@@ -163,10 +179,7 @@ public class Menu {
 	}
 
 	private String[] getLine() {
-		String line = scanner.nextLine();
-		String inputs[] = line.split(regex);
-
-		return inputs;
+		return scanner.nextLine().trim().split(regex);
 	}
 
 	private void displayHeader() {

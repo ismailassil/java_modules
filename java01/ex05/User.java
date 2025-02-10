@@ -1,4 +1,3 @@
-
 public class User {
 	private int id;
 	private String name;
@@ -12,7 +11,6 @@ public class User {
 		this.id = UserIdsGenerator.getInstance().generateId();
 		this.name = name;
 		this.balance = balance;
-		System.out.println("User with id = " + id + " is added");
 	}
 
 	public int incoming(double amount) {

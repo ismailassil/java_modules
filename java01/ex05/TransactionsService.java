@@ -1,9 +1,9 @@
 import java.util.UUID;
 
 public class TransactionsService {
-	public static final int DEBIT = 0;
-	public static final int CREDIT = 1;
-	private UsersList users;
+	private static final int DEBIT = 0;
+	private static final int CREDIT = 1;
+	private final UsersList users = new UsersArrayList();
 	private TransactionsLinkedList unpairedTransaction;
 
 	public void addUser(User user) {
