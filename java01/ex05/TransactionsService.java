@@ -4,7 +4,7 @@ public class TransactionsService {
 	private static final int DEBIT = 0;
 	private static final int CREDIT = 1;
 	private final UsersList users = new UsersArrayList();
-	private TransactionsLinkedList unpairedTransaction;
+	private final TransactionsLinkedList unpairedTransaction = new TransactionsLinkedList();
 
 	public void addUser(User user) {
 		users.addUser(user);
@@ -26,15 +26,15 @@ public class TransactionsService {
 
 		int isOk = sender.outgoing(amount * -1);
 		if (isOk == 1 || isOk == 2) {
-			unpairedTransaction.addTransaction(new Transaction(transId, sender, recipient, CREDIT, amount));
-			unpairedTransaction.addTransaction(new Transaction(transId, sender, recipient, DEBIT, amount));
+			unpairedTransaction.addTransaction(new Transaction(transId, recipient, sender, CREDIT, amount));
+			unpairedTransaction.addTransaction(new Transaction(transId, recipient, sender, DEBIT, amount));
 			if (isOk == 2)
 				throw new IllegalTransactionException("Illegal Transaction Exception");
 		}
 		recipient.incoming(amount);
 
-		Transaction senderTransaction = new Transaction(transId, sender, recipient, CREDIT, amount * -1);
-		Transaction recipientTransaction = new Transaction(transId, sender, recipient, DEBIT, amount);
+		Transaction senderTransaction = new Transaction(transId, recipient, sender, CREDIT, amount * -1);
+		Transaction recipientTransaction = new Transaction(transId, recipient, sender, DEBIT, amount);
 
 		sender.addTransaction(senderTransaction);
 		recipient.addTransaction(recipientTransaction);
@@ -44,15 +44,16 @@ public class TransactionsService {
 	public void removeTransactionById(String transId, int userId) {
 		User user = users.getUserById(userId);
 		TransactionsList allTransactions = user.getTransactionsHistory();
-		allTransactions.removeTransactionById(transId);
-
+		Transaction temporaryTransaction = null;
 		Transaction[] userTransactions = allTransactions.toArray();
 		for (Transaction transaction : userTransactions) {
 			if (transaction.getId().equals(transId)) {
-				unpairedTransaction.addTransaction(transaction);
+				temporaryTransaction = transaction;
 				break;
 			}
 		}
+		allTransactions.removeTransactionById(transId);
+		unpairedTransaction.addTransaction(temporaryTransaction);
 	}
 
 	public Transaction[] getUserTransactions(int id) {

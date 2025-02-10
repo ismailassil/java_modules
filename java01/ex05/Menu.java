@@ -1,16 +1,31 @@
 import java.util.Scanner;
 
 public class Menu {
+	private static final int ADD_USER_CMD = 1;
+	private static final int VIEW_USER_BALANCE_CMD = 2;
+	private static final int PERFORM_TRANSFER_CMD = 3;
+	private static final int VIEW_ALL_TRANSACTIONS_CMD = 4;
+	private static final int REMOVE_TRANSFER_CMD = 5;
+	private static final int CHECK_TRANSFER_VALIDITY_CMD = 6;
+	private static final int FINISH = 7;
+
 	public static final int DEBIT = 0;
 	public static final int CREDIT = 1;
 	private final String regex = "\\s+";
+	private boolean isDev = false;
 	private final TransactionsService transactionsService = new TransactionsService();
 	private Scanner scanner;
-	private int numberCmd;
 
 	public static final String ANSI_RESET = "\u001B[0m";
 	public static final String ANSI_RED = "\u001B[1;31m";
 	public static final String ANSI_YELLOW = "\u001B[33m";
+
+	public Menu(String profile) {
+		if ((!profile.equals("--profile=production") && !profile.equals("--profile=dev")))
+			throw new RuntimeException("Invalid Parameter");
+		if (profile.equals("--profile=dev"))
+			this.isDev = true;
+	}
 
 	public void run() {
 
@@ -27,28 +42,46 @@ public class Menu {
 				line = scanner.nextLine().trim();
 				int cmd = Integer.parseInt(line);
 				switch (cmd) {
-					case 1 -> addUser();
-					case 2 -> viewUserBalance();
-					case 3 -> performTransfer();
-					case 4 -> viewAllTransactions();
-					case 5 -> removeTransferById();
-					case 6 -> checkTransferValidity();
-					case 7 -> {
-						scanner.close();
-						return;
+					case ADD_USER_CMD -> addUser();
+					case VIEW_USER_BALANCE_CMD -> viewUserBalance();
+					case PERFORM_TRANSFER_CMD -> performTransfer();
+					case VIEW_ALL_TRANSACTIONS_CMD -> viewAllTransactions();
+					case REMOVE_TRANSFER_CMD -> {
+						if (!isDev) {
+							scanner.close();
+							return;
+						}
+						removeTransferById();
+
+					}
+					case CHECK_TRANSFER_VALIDITY_CMD -> {
+						if (!isDev) {
+							System.out.println(ANSI_RED + "! Invalid option, please try again" + ANSI_RESET);
+						} else {
+							checkTransferValidity();
+						}
+					}
+					case FINISH -> {
+						if (isDev) {
+							scanner.close();
+							return;
+						}
+						System.out.println(ANSI_RED + "! Invalid option, please try again" + ANSI_RESET);
 					}
 					default -> System.out.println(ANSI_RED + "! Invalid option, please try again" + ANSI_RESET);
 				}
+				System.out.println("---------------------------------------------------------------------------------");
 			} catch (NumberFormatException e) {
 				System.out.println(ANSI_RED + "! Please enter a valid number" + ANSI_RESET);
+				System.out.println("---------------------------------------------------------------------------------");
 			} catch (RuntimeException e) {
 				System.out.println(ANSI_RED + "Unexpected error: " + e.getMessage() + ANSI_RESET);
+				System.out.println("---------------------------------------------------------------------------------");
 			}
 		}
 	}
 
 	private void addUser() {
-		numberCmd++;
 		System.out.println(ANSI_YELLOW + "Enter a user name and a balance" + ANSI_RESET);
 		String inputs[] = getLine();
 		if (inputs.length != 2) {
@@ -68,7 +101,6 @@ public class Menu {
 	}
 
 	private void viewUserBalance() {
-		numberCmd++;
 		System.out.println(ANSI_YELLOW + "Enter a user ID" + ANSI_RESET);
 		String inputs[] = getLine();
 		if (inputs.length != 1) {
@@ -87,7 +119,6 @@ public class Menu {
 	}
 
 	private void performTransfer() {
-		numberCmd++;
 		System.out.println(ANSI_YELLOW + "Enter a sender ID, a recipient ID, and a transfer amount" + ANSI_RESET);
 		String inputs[] = getLine();
 		if (inputs.length != 3) {
@@ -109,7 +140,6 @@ public class Menu {
 	}
 
 	private void viewAllTransactions() {
-		numberCmd++;
 		System.out.println(ANSI_YELLOW + "Enter a user ID" + ANSI_RESET);
 		String inputs[] = getLine();
 		if (inputs.length != 1) {
@@ -120,10 +150,16 @@ public class Menu {
 			int userId = Integer.parseInt(inputs[0]);
 			Transaction[] userHistory = transactionsService.getUserTransactions(userId);
 			for (Transaction transaction : userHistory) {
-				String type = transaction.getTransferCategory() == DEBIT ? "+" : "-";
-				String reply = "To " + transaction.getRecipient() + "(id = " + userId + ") " + type
-						+ transaction.getTransferAmount()
-						+ " with id = " + transaction.getId();
+				String reply = "";
+				if (transaction.getTransferCategory() == CREDIT) {
+					reply = "To " + transaction.getRecipient().getName() + "(id = " + transaction.getRecipient().getId()
+							+ ") "
+							+ transaction.getTransferAmount() + " with id = " + transaction.getId();
+				} else if (transaction.getTransferCategory() == CREDIT) {
+					reply = "From " + transaction.getSender().getName() + "(id = " + transaction.getRecipient().getId()
+							+ ") "
+							+ transaction.getTransferAmount() + " with id = " + transaction.getId();
+				}
 				System.out.println(reply);
 			}
 		} catch (NumberFormatException | UserNotFoundException e) {
@@ -132,7 +168,6 @@ public class Menu {
 	}
 
 	private void removeTransferById() {
-		numberCmd++;
 		System.out.println(ANSI_YELLOW + "Enter a user ID and a transfer ID" + ANSI_RESET);
 		String inputs[] = getLine();
 		if (inputs.length != 2) {
@@ -154,6 +189,7 @@ public class Menu {
 					recipientId = rec.getId();
 					recipientName = rec.getName();
 					amount = trans.getTransferAmount();
+					amount = amount < 0 ? amount * -1 : amount;
 					break;
 				}
 			}
@@ -167,7 +203,6 @@ public class Menu {
 	}
 
 	private void checkTransferValidity() {
-		numberCmd++;
 		System.out.println(ANSI_YELLOW + "Check results:" + ANSI_RESET);
 		Transaction[] transactions = transactionsService.checkTransactions();
 		for (Transaction transaction : transactions) {
@@ -183,12 +218,20 @@ public class Menu {
 	}
 
 	private void displayHeader() {
-		System.out.println("1. Add a user");
-		System.out.println("2. View user balances");
-		System.out.println("3. Perform a transfer");
-		System.out.println("4. View all transactions for a specific user");
-		System.out.println("5. DEV - remove a transfer by ID");
-		System.out.println("6. DEV - check transfer validity");
-		System.out.println("7. Finish execution");
+		if (isDev) {
+			System.out.println("1. Add a user");
+			System.out.println("2. View user balances");
+			System.out.println("3. Perform a transfer");
+			System.out.println("4. View all transactions for a specific user");
+			System.out.println("5. DEV - remove a transfer by ID");
+			System.out.println("6. DEV - check transfer validity");
+			System.out.println("7. Finish execution");
+		} else {
+			System.out.println("1. Add a user");
+			System.out.println("2. View user balances");
+			System.out.println("3. Perform a transfer");
+			System.out.println("4. View all transactions for a specific user");
+			System.out.println("5. Finish execution");
+		}
 	}
 }

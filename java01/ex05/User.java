@@ -2,7 +2,7 @@ public class User {
 	private int id;
 	private String name;
 	private double balance;
-	private TransactionsList transactionsHistory;
+	private final TransactionsList transactionsHistory = new TransactionsLinkedList();
 
 	public User(String name, double balance) {
 		if (balance < 0) {

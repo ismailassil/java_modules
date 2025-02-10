@@ -4,7 +4,7 @@ public class TransactionsService {
 	private static final int DEBIT = 0;
 	private static final int CREDIT = 1;
 	private final UsersList users = new UsersArrayList();
-	private TransactionsLinkedList unpairedTransaction;
+	private final TransactionsLinkedList unpairedTransaction = new TransactionsLinkedList();
 
 	public void addUser(User user) {
 		users.addUser(user);
