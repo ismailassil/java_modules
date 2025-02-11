@@ -35,10 +35,10 @@ public class Menu {
 		}
 
 		scanner = new Scanner(System.in);
+		displayHeader();
 		String line;
-		while (true) {
+		while (scanner.hasNextLine()) {
 			try {
-				displayHeader();
 				line = scanner.nextLine().trim();
 				int cmd = Integer.parseInt(line);
 				switch (cmd) {
@@ -52,7 +52,6 @@ public class Menu {
 							return;
 						}
 						removeTransferById();
-
 					}
 					case CHECK_TRANSFER_VALIDITY_CMD -> {
 						if (!isDev) {
@@ -71,6 +70,7 @@ public class Menu {
 					default -> System.out.println(ANSI_RED + "! Invalid option, please try again" + ANSI_RESET);
 				}
 				System.out.println("---------------------------------------------------------------------------------");
+				displayHeader();
 			} catch (NumberFormatException e) {
 				System.out.println(ANSI_RED + "! Please enter a valid number" + ANSI_RESET);
 				System.out.println("---------------------------------------------------------------------------------");
@@ -79,6 +79,7 @@ public class Menu {
 				System.out.println("---------------------------------------------------------------------------------");
 			}
 		}
+		scanner.close();
 	}
 
 	private void addUser() {
@@ -217,7 +218,14 @@ public class Menu {
 	}
 
 	private String[] getLine() {
-		return scanner.nextLine().trim().split(regex);
+		String[] line = null;
+		while (scanner.hasNextLine())
+			line = scanner.nextLine().trim().split(regex);
+		if (line == null) {
+			scanner.close();
+			System.exit(1);
+		}
+		return line;
 	}
 
 	private void displayHeader() {
