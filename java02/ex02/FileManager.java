@@ -111,26 +111,36 @@ public class FileManager {
 
 		File whatFile = new File(path + cmd[1]);
 		if (!whatFile.exists()) {
+			if (whatFile.isDirectory()) {
+				System.out.println("! <mv> " + cmd[1] + " is a directory");
+				return;
+			}
 			System.out.println("! <mv> " + cmd[1] + " no such file");
 			return;
 		}
 		String movedFolder;
+		if (path.endsWith("/"))
+			path = path.substring(0, path.length() - 1);
 		if (cmd[2].startsWith("../")) {
-			movedFolder = path.substring(0, path.lastIndexOf("/")) + "/" + cmd[2].substring(cmd[2].indexOf("/") + 1);
+			movedFolder = path.substring(0, path.lastIndexOf("/")) + "/" + cmd[2].substring(cmd[2].indexOf("/") + 1)
+					+ "/" + cmd[1];
 		} else if (cmd[2].startsWith("/")) {
-			movedFolder = cmd[2];
+			movedFolder = cmd[2] + "/" + cmd[1];
 		} else {
-			if (cmd[2].equals(".."))
+			if (cmd[2].equals("..")) {
 				movedFolder = path.substring(0, path.lastIndexOf("/"));
-			else
+			} else
 				movedFolder = path + "/" + cmd[2];
 		}
 
+		
 		File whereFile = new File(movedFolder);
-		if (!whatFile.exists()) {
-			boolean isRen = whatFile.renameTo(whereFile);
-			if (!isRen)
-				System.out.println("! <mv> renaming failed");
+		if (whereFile.isDirectory()) {
+			movedFolder = movedFolder + "/" + cmd[1];
 		}
+		whereFile = new File(movedFolder);
+		boolean isRen = whatFile.renameTo(whereFile);
+		if (!isRen)
+			System.out.println("! <mv> rename/move failed");
 	}
 }
