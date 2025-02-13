@@ -14,7 +14,6 @@ Then, copies the resources folder into the target folder
 cp -r ImagesToChar/src/resources ImagesToChar/target
 ```
 
-
 ```bash
 jar cfm ImagesToChar/target/images-to-chars-printer.jar ImagesToChar/src/manifest.txt -C ImagesToChar/target/ .
 ```
