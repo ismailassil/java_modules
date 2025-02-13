@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: fr._42.printer.app.Program
+Class-Path: lib/JCDP-4.0.2.jar lib/JColor-5.5.1.jar lib/jcommander-1.82.jar
+Created-By: 19.0.2 (Oracle Corporation)

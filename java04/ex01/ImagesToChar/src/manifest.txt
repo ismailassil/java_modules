@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Main-Class: fr._42.printer.app.Program
+Created-By: 1.0 (iassil)
