@@ -6,10 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.Arrays;
-import java.util.ArrayList;
 
 public class Dictionary {
 	private String[] line1, line2;
@@ -38,7 +38,7 @@ public class Dictionary {
 
 		if (Files.readAttributes(file1, BasicFileAttributes.class).size() > 10000
 				|| Files.readAttributes(file2, BasicFileAttributes.class).size() > 10000) {
-			throw new RuntimeException("Size too big");
+			throw new RuntimeException("File size too big");
 		}
 
 		try (FileReader fileReader1 = new FileReader(args[0]);
@@ -55,8 +55,9 @@ public class Dictionary {
 			line1 = line_1.trim().split("\\s+");
 			line2 = line_2.trim().split("\\s+");
 
-			if (line1.length == 0 || line2.length == 0)
+			if (line1.length == 0 || line2.length == 0) {
 				throw new RuntimeException("Empty file");
+			}
 		}
 	}
 

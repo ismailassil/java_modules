@@ -76,8 +76,12 @@ public class FileType {
 				if (pos == -1) {
 					throw new RuntimeException("Invalid Format");
 				}
-				String type = line.substring(0, pos).trim();
-				String HexString = line.substring(pos + 1).trim().replaceAll("\\s+", "");
+				String type = line.substring(0, pos).trim().replaceAll("\\s+", "");
+				String HexString = line.substring(pos + 1);
+				if (HexString.isEmpty()) {
+					throw new RuntimeException("Invalid Format");
+				}
+				HexString = HexString.trim().replaceAll("\\s+", "");
 				map.put(type, HexString);
 			}
 		}

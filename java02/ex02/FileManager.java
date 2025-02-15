@@ -15,28 +15,23 @@ public class FileManager {
 	public void run() throws Exception {
 		System.out.println(path);
 		try (Scanner scanner = new Scanner(System.in)) {
-			while (true) {
+			System.out.print("-> ");
+			while (scanner.hasNextLine()) {
 				String[] cmd = getLine(scanner);
 				if (cmd.length == 0 || cmd[0] == null) {
 					break;
 				}
 				switch (cmd[0]) {
-				case "exit":
-					scanner.close();
-					System.exit(1);
-					break;
-				case "ls":
-					lsCmd(cmd);
-					break;
-				case "cd":
-					cdCmd(cmd);
-					break;
-				case "mv":
-					mvCmd(cmd);
-					break;
-				default:
-					System.out.println("Command not found");
+					case "exit" -> {
+						scanner.close();
+						System.exit(1);
+					}
+					case "ls" -> lsCmd(cmd);
+					case "cd" -> cdCmd(cmd);
+					case "mv" -> mvCmd(cmd);
+					default -> System.out.println("Command not found");
 				}
+				System.out.print("-> ");
 			}
 		}
 	}
@@ -48,13 +43,19 @@ public class FileManager {
 		path = args[0].substring(args[0].indexOf("=") + 1);
 		if (path.isEmpty())
 			throw new RuntimeException("Invalid Parameter - java Program --current-folder=<path>");
+		if (path.equals(".")) {
+			path = System.getProperty("user.dir");
+		}
+		if (path.equals("..")) {
+			path = System.getProperty("user.dir");
+			path = path.substring(0, path.lastIndexOf("/"));
+		}
 		File file = new File(path);
 		if (!file.exists())
 			throw new RuntimeException("Please enter a valid Path");
 	}
 
 	private String[] getLine(Scanner scanner) {
-		System.out.print("-> ");
 		return scanner.nextLine().trim().split("\\s+");
 	}
 
@@ -68,11 +69,17 @@ public class FileManager {
 		File[] files = new File(path).listFiles();
 
 		for (File file : files) {
-			Path filepath = Paths.get(path + file.getName());
-			double sizeLength = Files.readAttributes(filepath, BasicFileAttributes.class).size() / 1024.0;
-			BigDecimal bd = new BigDecimal(sizeLength);
-			bd = bd.setScale(2, RoundingMode.FLOOR);
-			System.out.println(file.getName() + " " + bd.doubleValue() + " KB");
+			try {
+				if (file.getName().startsWith(".")) {
+					continue;
+				}
+				Path filepath = Paths.get(path + file.getName());
+				double sizeLength = Files.readAttributes(filepath, BasicFileAttributes.class).size() / 1024.0;
+				BigDecimal bd = new BigDecimal(sizeLength);
+				bd = bd.setScale(2, RoundingMode.FLOOR);
+				System.out.printf("%-50s %-10.2f KB\n", file.getName(), bd.doubleValue());
+			} catch (Exception e) {
+			}
 		}
 	}
 
@@ -89,10 +96,16 @@ public class FileManager {
 		} else if (cmd[1].startsWith("/")) {
 			newFolder = cmd[1];
 		} else {
-			if (cmd[1].equals(".."))
+			if (cmd[1].equals("..")) {
+				int pos = path.lastIndexOf("/");
+				if (pos == -1) {
+					System.out.println("! <cd> folder not found");
+					return;
+				}
 				newFolder = path.substring(0, path.lastIndexOf("/"));
-			else
+			} else {
 				newFolder = path + "/" + cmd[1];
+			}
 		}
 		File newPath = new File(newFolder);
 		if (!newPath.exists()) {
@@ -133,7 +146,6 @@ public class FileManager {
 				movedFolder = path + "/" + cmd[2];
 		}
 
-		
 		File whereFile = new File(movedFolder);
 		if (whereFile.isDirectory()) {
 			movedFolder = movedFolder + "/" + cmd[1];
