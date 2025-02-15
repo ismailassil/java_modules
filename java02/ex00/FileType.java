@@ -63,6 +63,9 @@ public class FileType {
 
 	private Map<String, String> readSignatures() throws Exception {
 		File signature = new File("./signatures.txt");
+		if (!signature.exists()) {
+			throw new RuntimeException("<signature> file found");
+		}
 		try (Scanner reader = new Scanner(signature)) {
 			while (reader.hasNextLine()) {
 				String line = reader.nextLine();

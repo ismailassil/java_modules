@@ -32,13 +32,13 @@ public class WorkerThread implements Runnable {
 	private void downloadData(String link) throws Exception {
 		String filename = link.substring(link.lastIndexOf("/") + 1);
 		BufferedInputStream in = new BufferedInputStream(new URL(link).openStream());
-		FileOutputStream outfile = new FileOutputStream(filename);
-		byte[] buffer = new byte[1024];
-		int bytesRead;
-		while ((bytesRead = in.read(buffer, 0, 1024)) != -1) {
-			outfile.write(buffer, 0, bytesRead);
+		try (FileOutputStream outfile = new FileOutputStream(filename)) {
+			byte[] buffer = new byte[1024];
+			int bytesRead;
+			while ((bytesRead = in.read(buffer, 0, 1024)) != -1) {
+				outfile.write(buffer, 0, bytesRead);
+			}
 		}
-		outfile.close();
 	}
 
 }
